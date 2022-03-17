@@ -62,7 +62,9 @@ Func runProcess()
 EndFunc
 
 Func play()
+   For $hwnd In $arrHwnds
 
+   Next
 EndFunc
 
 Func update()
