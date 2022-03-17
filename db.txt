@@ -1,2 +1,2 @@
-C:\Users\K-COMP\Desktop\copyTrade_61jy1wdl3m_AutoIT\copyTrade.exe
-E:\MetaTrader5ICMarkets(SC)\terminal64.exe
+D:\test\mt4_exne\terminal.exe
+D:\test\mt4_exne - Copy\terminal.exe

@@ -29,14 +29,16 @@
 #Region ### START Koda GUI section ### Form=
 $Form1 = GUICreate("Form1", 455, 291, 192, 124)
 $run = GUICtrlCreateButton("Run", 288, 256, 75, 25)
-$beautify = GUICtrlCreateButton("Beautify", 368, 256, 75, 25)
+$play = GUICtrlCreateButton("Play", 368, 256, 75, 25)
 $Edit1 = GUICtrlCreateEdit("", 8, 8, 433, 241)
 GUICtrlSetData(-1, "Edit1")
 $update = GUICtrlCreateButton("Update", 8, 256, 75, 25)
 GUISetState(@SW_SHOW)
 #EndRegion ### END Koda GUI section ###
 Global $fileDB = "db.txt"
-Global $arrLocation
+Global $arrLocations
+Global $arrHwnds[0]
+
 loadFile()
 
 
@@ -47,8 +49,8 @@ While 1
 			Exit
 		Case $run
 			runProcess()
-		Case $beautify
-			beautify()
+		Case $play
+			play()
 		Case $update
 			update()
 
@@ -59,8 +61,8 @@ Func runProcess()
    openApp()
 EndFunc
 
-Func beautify()
-   ConsoleWrite("b")
+Func play()
+
 EndFunc
 
 Func update()
@@ -71,7 +73,7 @@ Func update()
 EndFunc
 
 Func loadFile()
-   $arrLocation = FileReadToArray($fileDB)
+   $arrLocations = FileReadToArray($fileDB)
    Local $sFileRead = FileRead($fileDB)
    GUICtrlSetData($Edit1, $sFileRead)
 EndFunc
@@ -92,15 +94,30 @@ Func saveFile($Edit1)
 EndFunc
 
 Func openApp()
-   For $prog In $arrLocation
+   For $prog In $arrLocations
 	  $progDir = Stringleft($prog,StringInStr($Prog,'\',0,-1))
-	  $checkRun = Run($prog,$progDir,@SW_SHOWNOACTIVATE)
-	  ConsoleWrite($checkRun)
-	  Local $aData = _WinAPI_EnumProcessWindows($checkRun, 0)
-	  _ArrayDisplay($aData, '_WinAPI_EnumProcessWindows')
-	  $hwnd1 = $aData[1][0]
-	  ConsoleWrite($hwnd1)
-	  WinWait($hwnd1, "", 10)
-	  WinMove($hwnd1, "", 1, 1, 100, 100, -1)
+	  $pid = Run($prog,$progDir,@SW_SHOWNOACTIVATE)
+	  $hwnd = getHwndFromPID($pid)
+	  _ArrayAdd($arrHwnds, $hwnd)
+	  WinWait($hwnd, "", 10)
    Next
+EndFunc
+
+Func getHwndFromPID($PID)
+    $hWnd = 0
+    $stPID = DllStructCreate("int")
+    Do
+        $winlist2 = WinList()
+        For $i = 1 To $winlist2[0][0]
+            If $winlist2[$i][0] <> "" Then
+                DllCall("user32.dll", "int", "GetWindowThreadProcessId", "hwnd", $winlist2[$i][1], "ptr", DllStructGetPtr($stPID))
+                If DllStructGetData($stPID, 1) = $PID Then
+                    $hWnd = $winlist2[$i][1]
+                    ExitLoop
+                EndIf
+            EndIf
+        Next
+        Sleep(100)
+    Until $hWnd <> 0
+    Return $hWnd
 EndFunc
